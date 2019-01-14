@@ -1,3 +1,5 @@
+#include "Chip8.hpp"
+
 #include <SFML/Graphics.hpp>
 
 int main()

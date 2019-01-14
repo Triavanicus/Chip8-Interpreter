@@ -8,7 +8,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin/)
 set(CMAKE_ARCHVE_OUTPUT_DIRECTORY bin/)
 set(CMAKE_LIBRARIES_OUTPUT_DIRECTORY bin/)
 
-file(GLOB SOURCE_FILES ${SOURCE_DIR}/main.cpp)
+file(GLOB SOURCE_FILES
+  ${SOURCE_DIR}/main.cpp
+  ${SOURCE_DIR}/Chip8.cpp)
+
 include_directories(${SOURCE_DIR})
 add_executable(Chip8 ${SOURCE_FILES})
 set_target_properties(Chip8 PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
