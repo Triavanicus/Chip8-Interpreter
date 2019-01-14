@@ -3,6 +3,7 @@
 #include "Defines.hpp"
 
 #include <cstdio>
+#include <random>
 
 struct Chip8
 {
