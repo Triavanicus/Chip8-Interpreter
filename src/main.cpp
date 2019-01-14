@@ -1,9 +1,34 @@
 #include "Chip8.hpp"
 
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
-int main()
+int main(int argc, char* args[])
 {
+    if (argc <= 1)
+    {
+        std::cout << "Too few arguments, needs filename." << std::endl;
+        return 0;
+    }
+
+    char* filename = args[1];
+    sf::FileInputStream file = {};
+    if (!file.open(filename))
+    {
+        std::cout << "File not found: " << filename << std::endl;
+        return 0;
+    }
+
+    uint dataSize = 0x1000 - 0x200;
+    if (file.getSize() > dataSize)
+    {
+        std::cout << "File to large, max file size is " << dataSize
+                  << ", file size is " << file.getSize() << std::endl;
+    }
+
+    u8* data = new u8[dataSize]();
+    file.read(data, file.getSize());
+
     const int windowWidth = 1280;
     const int windowHeight = 720;
     const int chip8Width = 64;
@@ -14,6 +39,7 @@ int main()
         sf::VideoMode(windowWidth, windowHeight), "Chip8 Interpreter");
 
     auto chip8 = Chip8();
+    chip8.load(data, dataSize);
 
     auto chip8Clock = sf::Clock();
     auto chip8TimerClock = sf::Clock();
