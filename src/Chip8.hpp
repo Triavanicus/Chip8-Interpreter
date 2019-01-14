@@ -2,6 +2,8 @@
 
 #include "Defines.hpp"
 
+#include <cstdio>
+
 struct Chip8
 {
     u8 memory[0x1000];

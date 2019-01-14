@@ -24,7 +24,14 @@ void Chip8::load(u8* program, u16 size)
 
 void Chip8::cycle()
 {
-    // the fun bit.
+    auto op = DecodedOpcode(pc++);
+    switch (op.opcode & 0xf000)
+    {
+        default:
+            printf_s("Unknown opcode: 0x%X\n", op.opcode);
+            pc--;
+            break;
+    }
 }
 
 void Chip8::reset(bool keepProgram)
