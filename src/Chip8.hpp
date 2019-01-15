@@ -2,21 +2,40 @@
 
 #include "Defines.hpp"
 
-#include <cstdio>
-#include <random>
-
 struct Chip8
 {
-    u8 memory[0x1000];
-    u16* pc; // Program Counter
-    u8* savedAddress;
-    u8 registers[0x10];
-    u16 stack[0x10];
-    u16* sp; // stack pointer
-    u8 delayTimer;
-    u8 soundTimer;
-    u8 pixels[64 * 32];
-    bool drawFlag;
+    union {
+        u8 memory[0x1000];
+        struct
+        {
+            u16* pc;
+            u8* savedAddress;
+            u8 registers[0x10];
+            u16 stack[0x10];
+            u16* sp;
+            u8 soundTimer;
+            u8 delayTimer;
+            u8 pixels[256];
+            bool drawFlag;
+            bool keys[0x10];
+            u8 font[0x10][5];
+        } interpreterSpace;
+
+        struct
+        {
+            u16* pc;
+            u8* savedAddress;
+            u8 registers[0x10];
+            u16 stack[0x10];
+            u16* sp;
+            u8 soundTimer;
+            u8 delayTimer;
+            u8 pixels[256];
+            bool drawFlag;
+            bool keys[0x10];
+            u8 font[0x10][5];
+        };
+    };
 
     Chip8();
     ~Chip8();
@@ -30,7 +49,7 @@ struct Chip8
 
 struct DecodedOpcode
 {
-    int opcode;
+    int code;
     int x;
     int y;
     int n;
