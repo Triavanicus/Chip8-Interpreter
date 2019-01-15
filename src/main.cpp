@@ -2,6 +2,24 @@
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
+void drawPixels(sf::RenderWindow& window,
+    sf::RectangleShape& pixel,
+    u8 pixels[],
+    int width,
+    int height,
+    float pixelWidth,
+    float pixelHeight)
+{
+    for (auto y = 0; y < height; y++)
+        for (auto x = 0; x < width; x++)
+        {
+            if ((pixels[(x / 8) + (y * 8)] >> (7 - (x % 8))) & 0b1)
+            {
+                pixel.setPosition(x * pixelWidth, y * pixelHeight);
+                window.draw(pixel);
+            }
+        }
+}
 
 int main(int argc, char* args[])
 {
@@ -49,6 +67,27 @@ int main(int argc, char* args[])
     sf::RectangleShape pixel = sf::RectangleShape(
         sf::Vector2f(pixelWidth, pixelHeight));
 
+    u8 oldChip8Pixels[(64 / 8 * 32)] = {};
+
+    sf::Keyboard::Key keys[0x10] = {
+        sf::Keyboard::X,    // 0
+        sf::Keyboard::Num1, // 1
+        sf::Keyboard::Num2, // 2
+        sf::Keyboard::Num3, // 3
+        sf::Keyboard::Q,    // 4
+        sf::Keyboard::W,    // 5
+        sf::Keyboard::E,    // 6
+        sf::Keyboard::A,    // 7
+        sf::Keyboard::S,    // 8
+        sf::Keyboard::D,    // 9
+        sf::Keyboard::Z,    // a
+        sf::Keyboard::C,    // b
+        sf::Keyboard::Num4, // c
+        sf::Keyboard::R,    // d
+        sf::Keyboard::F,    // e
+        sf::Keyboard::V     // f
+    };
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -56,6 +95,9 @@ int main(int argc, char* args[])
         {
             if (event.type == sf::Event::Closed) { window.close(); }
         }
+
+        for (auto i = 0; i < 0x10; i++)
+            chip8.keys[i] = sf::Keyboard::isKeyPressed(keys[i]);
 
         if (chip8Clock.getElapsedTime().asMicroseconds() >= 1000)
         {
@@ -75,21 +117,26 @@ int main(int argc, char* args[])
         {
             window.clear();
             {
-                for (auto y = 0; y < chip8Height; y++)
-                    for (auto x = 0; x < chip8Width; x++)
-                    {
-                        if (chip8.pixels[x + y * chip8Width] > 0)
-                        {
-                            pixel.setPosition(x * pixelWidth, y * pixelHeight);
-                            window.draw(pixel);
-                        }
-                    }
+                drawPixels(window,
+                    pixel,
+                    oldChip8Pixels,
+                    chip8Width,
+                    chip8Height,
+                    pixelWidth,
+                    pixelHeight);
+                drawPixels(window,
+                    pixel,
+                    chip8.pixels,
+                    chip8Width,
+                    chip8Height,
+                    pixelWidth,
+                    pixelHeight);
+                std::copy(chip8.pixels, chip8.pixels + 256, oldChip8Pixels);
+                window.display();
+                chip8.drawFlag = false;
             }
-            window.display();
-            chip8.drawFlag = false;
         }
     }
-
     delete[] data;
     return 0;
 }
