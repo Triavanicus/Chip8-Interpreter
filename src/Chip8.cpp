@@ -2,40 +2,40 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstdio>
 #include <ctime>
+#include <iostream>
 #include <random>
 
 Chip8::Chip8()
-    : pc {(u16*) &memory[0x200]},
-      savedAddress {},
-      registers {},
-      stack {},
-      sp {stack},
-      soundTimer {},
-      delayTimer {},
-      pixels {},
-      drawFlag {true},
-      keys {},
-      font {{0xf0, 0x90, 0x90, 0x90, 0xf0}, // 0
-          {0x20, 0x60, 0x20, 0x20, 0x70},   // 1
-          {0xf0, 0x10, 0xf0, 0x80, 0xf0},   // 2
-          {0xf0, 0x10, 0xf0, 0x10, 0xf0},   // 3
-          {0x90, 0x90, 0xf0, 0x10, 0x10},   // 4
-          {0xf0, 0x80, 0xf0, 0x10, 0xf0},   // 5
-          {0xf0, 0x80, 0xf0, 0x90, 0xf0},   // 6
-          {0xf0, 0x10, 0x20, 0x40, 0x40},   // 7
-          {0xf0, 0x90, 0xf0, 0x90, 0xf0},   // 8
-          {0xf0, 0x90, 0xf0, 0x10, 0xf0},   // 9
-          {0xf0, 0x90, 0xf0, 0x90, 0x90},   // a
-          {0xe0, 0x90, 0xe0, 0x90, 0xe0},   // b
-          {0xf0, 0x80, 0x80, 0x80, 0xf0},   // c
-          {0xe0, 0x90, 0x90, 0x90, 0xe0},   // d
-          {0xf0, 0x80, 0xf0, 0x80, 0xf0},   // e
-          {0xf0, 0x80, 0xf0, 0x80, 0x80}}
+    : pc {(u16*)&memory[0x200]}
+    , savedAddress {}
+    , registers {}
+    , stack {}
+    , sp {stack}
+    , soundTimer {}
+    , delayTimer {}
+    , pixels {}
+    , drawFlag {true}
+    , keys {}
+    , font {{0xf0, 0x90, 0x90, 0x90, 0xf0}, // 0
+            {0x20, 0x60, 0x20, 0x20, 0x70}, // 1
+            {0xf0, 0x10, 0xf0, 0x80, 0xf0}, // 2
+            {0xf0, 0x10, 0xf0, 0x10, 0xf0}, // 3
+            {0x90, 0x90, 0xf0, 0x10, 0x10}, // 4
+            {0xf0, 0x80, 0xf0, 0x10, 0xf0}, // 5
+            {0xf0, 0x80, 0xf0, 0x90, 0xf0}, // 6
+            {0xf0, 0x10, 0x20, 0x40, 0x40}, // 7
+            {0xf0, 0x90, 0xf0, 0x90, 0xf0}, // 8
+            {0xf0, 0x90, 0xf0, 0x10, 0xf0}, // 9
+            {0xf0, 0x90, 0xf0, 0x90, 0x90}, // a
+            {0xe0, 0x90, 0xe0, 0x90, 0xe0}, // b
+            {0xf0, 0x80, 0x80, 0x80, 0xf0}, // c
+            {0xe0, 0x90, 0x90, 0x90, 0xe0}, // d
+            {0xf0, 0x80, 0xf0, 0x80, 0xf0}, // e
+            {0xf0, 0x80, 0xf0, 0x80, 0x80}}
 
 {
-    printf_s("size: %d\n", sizeof(interpreterSpace) - 0x200);
+    std::cout << "size: " << sizeof(interpreterSpace) - 0x200 << std::endl;
     assert(sizeof(interpreterSpace) < 0x200);
     srand(std::time(nullptr));
 }
@@ -61,20 +61,21 @@ void Chip8::cycle()
                     drawFlag = true;
                     break;
 
-                case 0x00ee: pc = (u16*) &memory[*(--sp)]; break;
+                case 0x00ee: pc = (u16*)&memory[*(--sp)]; break;
 
                 default:
-                    printf_s("Unknow opcode [0000]: %x\n", op.code);
+                    std::cout << "Unknown opcode [0000]: " << std::hex
+                              << op.code << std::endl;
                     pc--;
                     break;
             }
             break;
 
-        case 0x1000: pc = (u16*) (&memory[op.nnn]); break;
+        case 0x1000: pc = (u16*)(&memory[op.nnn]); break;
 
         case 0x2000:
-            *sp++ = (u8*) pc - memory;
-            pc = (u16*) &memory[op.nnn];
+            *sp++ = (u8*)pc - memory;
+            pc    = (u16*)&memory[op.nnn];
             break;
 
         case 0x3000:
@@ -88,7 +89,8 @@ void Chip8::cycle()
         case 0x5000:
             if (op.n != 0)
             {
-                printf_s("Unknown opcode [5000]: %x", op.code);
+                std::cout << "Unknown opcode [5000]: " << std::hex << op.code
+                          << std::endl;
                 pc--;
                 break;
             }
@@ -103,11 +105,8 @@ void Chip8::cycle()
             switch (op.code & 0x000f)
             {
                 case 0x0000: registers[op.x] = registers[op.y]; break;
-
                 case 0x0001: registers[op.x] |= registers[op.y]; break;
-
                 case 0x0002: registers[op.x] &= registers[op.y]; break;
-
                 case 0x0003: registers[op.x] ^= registers[op.y]; break;
 
                 case 0x0004:
@@ -140,7 +139,8 @@ void Chip8::cycle()
                     break;
 
                 default:
-                    printf_s("Unknown opcode [8000]: %x\n", op.code);
+                    std::cout << "Unknown opcode [8000]: " << std::hex
+                              << op.code << std::endl;
                     pc--;
                     break;
             }
@@ -149,40 +149,39 @@ void Chip8::cycle()
         case 0x9000:
             if (op.n != 0)
             {
-                printf_s("Unknown opcode [9000]: %x\n", op.code);
+                std::cout << "Unknown opcode [9000]: " << std::hex << op.code
+                          << std::endl;
                 pc--;
                 break;
             }
+
             if (registers[op.x] != registers[op.y]) pc++;
             break;
 
         case 0xa000: savedAddress = &memory[op.nnn]; break;
-
-        case 0xb000: pc = (u16*) &memory[op.nnn + registers[0x0]]; break;
-
+        case 0xb000: pc = (u16*)&memory[op.nnn + registers[0x0]]; break;
         case 0xc000: registers[op.x] = (rand() % 255) & op.nn; break;
 
         case 0xd000:
             registers[0xf] = 0;
-            drawFlag = true;
+            drawFlag       = true;
 
             for (int y = registers[op.y], i = 0; i < op.n; y++, i++)
             {
-                auto sprite = savedAddress[i];
-                auto x = registers[op.x];
-                auto xByte = x / 8;
+                auto sprite      = savedAddress[i];
+                auto x           = registers[op.x];
+                auto xByte       = (x / 8) % 8;
                 auto shiftAmount = x % 8;
-                auto yoff = y;
-                if (y >= 32) yoff = y - 32;
-                auto pixLoc = xByte + (yoff * 8);
+                auto yoff        = y % 32;
+                auto pixLoc      = xByte + (yoff * 8);
 
                 if ((pixels[pixLoc] & (sprite >> shiftAmount)) != 0)
                     registers[0xf] = 1;
                 pixels[pixLoc] ^= sprite >> shiftAmount;
 
-                if (xByte % 8 == 7) pixLoc = (yoff * 8) - 1;
-                pixLoc++;
+                pixLoc      = ((xByte + 1) % 8) + (yoff * 8);
                 shiftAmount = 8 - shiftAmount;
+
                 if ((pixels[pixLoc] & (sprite << shiftAmount)) != 0)
                     registers[0xf] = 1;
                 pixels[pixLoc] ^= sprite << shiftAmount;
@@ -195,12 +194,14 @@ void Chip8::cycle()
                 case 0x009e:
                     if (keys[registers[op.x]]) pc++;
                     break;
+
                 case 0x00a1:
                     if (!keys[registers[op.x]]) pc++;
                     break;
 
                 default:
-                    printf_s("Unknown opcode [e000]: %x\n", op.code);
+                    std::cout << "Unknown opcode [e000]: " << std::hex
+                              << op.code << std::endl;
                     pc--;
                     break;
             }
@@ -219,7 +220,7 @@ void Chip8::cycle()
                         if (keys[i] != 0)
                         {
                             registers[op.x] = i;
-                            canResume = true;
+                            canResume       = true;
                         }
                     }
                     if (!canResume) pc--;
@@ -227,11 +228,8 @@ void Chip8::cycle()
                 break;
 
                 case 0x0015: delayTimer = registers[op.x]; break;
-
                 case 0x0018: soundTimer = registers[op.x]; break;
-
                 case 0x001e: savedAddress += registers[op.x]; break;
-
                 case 0x0029: savedAddress = font[registers[op.x]]; break;
 
                 case 0x0033:
@@ -249,14 +247,15 @@ void Chip8::cycle()
                     break;
 
                 default:
-                    printf_s("Unknow opcode [f000]: %x\n", op.code);
+                    std::cout << "Unknown opcode [f000]: " << std::hex
+                              << op.code << std::endl;
                     pc--;
                     break;
             }
             break;
 
         default:
-            printf_s("Unknown opcode: %x\n", op.code);
+            std::cout << "Unknown opcode: " << std::hex << op.code << std::endl;
             pc--;
             break;
     }
@@ -264,14 +263,13 @@ void Chip8::cycle()
 
 void Chip8::reset(bool keepProgram)
 {
-    pc = (u16*) &memory[0x200];
+    pc           = (u16*)&memory[0x200];
     savedAddress = nullptr;
 
     for (auto& r : registers) r = 0;
-
     for (auto& s : stack) s = 0;
-    sp = stack;
 
+    sp         = stack;
     delayTimer = 0;
     soundTimer = 0;
 
@@ -286,11 +284,12 @@ void Chip8::reset(bool keepProgram)
 
 DecodedOpcode::DecodedOpcode(u16* pc)
 {
-    auto* opByte = (u8*) pc;
+    auto* opByte = (u8*)pc;
+
     code = (*opByte << 8) | *(opByte + 1);
-    x = (code & 0x0f00) >> 8;
-    y = (code & 0x00f0) >> 4;
-    n = code & 0x000f;
-    nn = code & 0x00ff;
-    nnn = code & 0x0fff;
+    x    = (code & 0x0f00) >> 8;
+    y    = (code & 0x00f0) >> 4;
+    n    = code & 0x000f;
+    nn   = code & 0x00ff;
+    nnn  = code & 0x0fff;
 }

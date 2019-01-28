@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(Chip8)
 
-set(SFML_STATIC_LIBRARIES TRUE)
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin/)

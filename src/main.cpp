@@ -2,7 +2,9 @@
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
-void drawPixels(sf::RenderWindow& window,
+
+void drawPixels(
+    sf::RenderWindow& window,
     sf::RectangleShape& pixel,
     u8 pixels[],
     int width,
@@ -12,13 +14,11 @@ void drawPixels(sf::RenderWindow& window,
 {
     for (auto y = 0; y < height; y++)
         for (auto x = 0; x < width; x++)
-        {
             if ((pixels[(x / 8) + (y * 8)] >> (7 - (x % 8))) & 0b1)
             {
                 pixel.setPosition(x * pixelWidth, y * pixelHeight);
                 window.draw(pixel);
             }
-        }
 }
 
 int main(int argc, char* args[])
@@ -29,7 +29,7 @@ int main(int argc, char* args[])
         return 0;
     }
 
-    char* filename = args[1];
+    char* filename           = args[1];
     sf::FileInputStream file = {};
     if (!file.open(filename))
     {
@@ -47,10 +47,10 @@ int main(int argc, char* args[])
     u8* data = new u8[dataSize]();
     file.read(data, file.getSize());
 
-    const int windowWidth = 1280;
+    const int windowWidth  = 1280;
     const int windowHeight = 720;
-    const int chip8Width = 64;
-    const int chip8Height = 32;
+    const int chip8Width   = 64;
+    const int chip8Height  = 32;
 
     sf::RenderWindow window = {};
     window.create(
@@ -59,13 +59,13 @@ int main(int argc, char* args[])
     auto chip8 = Chip8();
     chip8.load(data, dataSize);
 
-    auto chip8Clock = sf::Clock();
+    auto chip8Clock      = sf::Clock();
     auto chip8TimerClock = sf::Clock();
 
-    auto pixelWidth = (float) windowWidth / chip8Width;
-    auto pixelHeight = (float) windowHeight / chip8Height;
-    sf::RectangleShape pixel = sf::RectangleShape(
-        sf::Vector2f(pixelWidth, pixelHeight));
+    auto pixelWidth  = (float)windowWidth / chip8Width;
+    auto pixelHeight = (float)windowHeight / chip8Height;
+    sf::RectangleShape pixel
+        = sf::RectangleShape(sf::Vector2f(pixelWidth, pixelHeight));
 
     u8 oldChip8Pixels[(64 / 8 * 32)] = {};
 
@@ -92,9 +92,7 @@ int main(int argc, char* args[])
     {
         sf::Event event;
         while (window.pollEvent(event))
-        {
             if (event.type == sf::Event::Closed) { window.close(); }
-        }
 
         for (auto i = 0; i < 0x10; i++)
             chip8.keys[i] = sf::Keyboard::isKeyPressed(keys[i]);
@@ -117,26 +115,31 @@ int main(int argc, char* args[])
         {
             window.clear();
             {
-                drawPixels(window,
+                drawPixels(
+                    window,
                     pixel,
                     oldChip8Pixels,
                     chip8Width,
                     chip8Height,
                     pixelWidth,
                     pixelHeight);
-                drawPixels(window,
+
+                drawPixels(
+                    window,
                     pixel,
                     chip8.pixels,
                     chip8Width,
                     chip8Height,
                     pixelWidth,
                     pixelHeight);
+
                 std::copy(chip8.pixels, chip8.pixels + 256, oldChip8Pixels);
                 window.display();
                 chip8.drawFlag = false;
             }
         }
     }
+
     delete[] data;
     return 0;
 }

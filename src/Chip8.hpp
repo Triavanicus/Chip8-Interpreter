@@ -4,7 +4,8 @@
 
 struct Chip8
 {
-    union {
+    union
+    {
         u8 memory[0x1000];
         struct
         {
